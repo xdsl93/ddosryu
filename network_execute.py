@@ -77,10 +77,10 @@ class NetworkExecute(app_manager.RyuApp):
                     print v[3]
                 elif (v[0] == "limit1"):
                     #print("$$$" + str(n))       
-                        self.limit_flow1(v[2], v[1], v[3], v[4]) #passa datapath[2], src_ip[3], dst_ip v[4], in_port v[5]
-                        network_knowledge.nk.edit_blacklist(v[1], v[5]) #passa src_ip e flow_ts
+                    self.limit_flow1(v[2], v[1], v[3], v[4]) #passa datapath[2], src_ip[3], dst_ip v[4], in_port v[5]
+                    network_knowledge.nk.edit_blacklist(v[1], v[5]) #passa src_ip e flow_ts
                 elif (v[0] == "limit2"):
-                        self.limit_flow2(v[2], v[1], v[3], v[4])
+                    self.limit_flow2(v[2], v[1], v[3], v[4])
                 else:
                     return
 
