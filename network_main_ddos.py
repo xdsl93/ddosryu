@@ -41,9 +41,6 @@ import network_delay_detector
 import network_plan
 import network_execute
 import network_knowledge
-#import coda_azione
-#import coda_messaggio
-
 
 
 CONF = cfg.CONF
@@ -65,8 +62,6 @@ class NetworKMainDDos(app_manager.RyuApp):
         "network_plan": network_plan.NetworkPlan,
         "network_execute" : network_execute.NetworkExecute,
         "network_knowledge" : network_knowledge.NetworkKnowledge}
-        #"coda_messaggio" : coda_messaggio.MessageQueue,
-        #"coda_azione" : coda_azione.ActionQueue
 
     WEIGHT_MODEL = {'hop': 'weight', 'delay': "delay", "bw": "bw"}
 
@@ -79,8 +74,6 @@ class NetworKMainDDos(app_manager.RyuApp):
         self.plan = kwargs["network_plan"]
         self.execute = kwargs["network_execute"]
         self.knowledge = kwargs["network_knowledge"]
-        #self.queue = kwargs["coda_messaggio"]
-        #self.action = kwargs["coda_azione"]
         self.datapaths = {}
         self.weight = self.WEIGHT_MODEL[CONF.weight]
 

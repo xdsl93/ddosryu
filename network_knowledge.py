@@ -122,13 +122,11 @@ class NetworkKnowledge(app_manager.RyuApp):
             self.dict_dpid[ip_src] = dpid
             print ("Aggiunta DPID   " + str(self.dict_dpid))
 
-
     def add_in_port(self, ip_src, in_port):
         if not ip_src in self.dict_in_port:
             self.dict_in_port.setdefault(ip_src, None) 
             self.dict_in_port[ip_src] = in_port
             print ("Aggiunta IN_PORT" + str(self.dict_in_port))
-
 
     def add_flow_ts(self, ip_src, flow_ts):
         if not ip_src in self.dict_flow_ts:
@@ -136,17 +134,12 @@ class NetworkKnowledge(app_manager.RyuApp):
             self.dict_flow_ts[ip_src] = flow_ts
             print ("Aggiunta FLOW_TS" + str(self.dict_flow_ts))
 
-
-    
-
-
     def add_exe_entry(self, ip_src, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts):
         if not ip_src in self.dict_action:
             v = [exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts]
             self.dict_action.setdefault(ip_src, []) 
             self.dict_action[ip_src] = v
             print ("entry EXECUTE" + str(self.dict_action))
-
         else: 
             pass
     
