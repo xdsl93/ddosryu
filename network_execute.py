@@ -32,7 +32,6 @@ import threading
 import network_monitor
 import network_topo_disc
 import network_plan
-import coda_azione
 import network_knowledge
 
 CONF = cfg.CONF

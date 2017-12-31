@@ -36,7 +36,6 @@ import time
 from collections import deque
 import numpy as np 
 
-import coda_messaggio
 import network_knowledge
 import network_plan
 
