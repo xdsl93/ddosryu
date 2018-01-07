@@ -27,13 +27,7 @@ import dpkt
 from ryu.topology import event, switches
 from ryu.topology.api import get_switch, get_link
 import setting
-
-#import network_monitor
-#import network_topo_disc
-#import network_plan
-#import coda_azione
-#import network_execute
-
+import threading
 
 CONF = cfg.CONF
 
@@ -55,6 +49,13 @@ class NetworkKnowledge(app_manager.RyuApp):
         self.dict_in_port = {}
         self.dict_flow_ts = {}
         self.dict_action = {}
+
+        self.sem_mon = threading.Semaphore(100)
+        
+        self.sem_plan = threading.Semaphore(0)
+        self.sem_plan2 = threading.Semaphore(1)
+
+        self.sem_exec = threading.Semaphore(0)
         
     
     def edit_blacklist(self, ip_src, ts):

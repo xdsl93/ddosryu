@@ -34,7 +34,6 @@ from ryu.lib.packet import arp
 from ryu.topology import event, switches
 from ryu.topology.api import get_switch, get_link
 
-
 import network_topo_disc
 import network_monitor
 import network_delay_detector

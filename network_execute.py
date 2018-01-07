@@ -49,7 +49,7 @@ class NetworkExecute(app_manager.RyuApp):
         super(NetworkExecute, self).__init__(*args, **kwargs)
         self.name = 'execute'
 
-        self.sem_exec = threading.Semaphore(0)
+        #self.sem_exec = threading.Semaphore(0)
         self.execute_thread = hub.spawn(self._execute)
         print("Execute thread: ", self.execute_thread)
 
@@ -60,10 +60,10 @@ class NetworkExecute(app_manager.RyuApp):
         while (1):
             
             print ('sem_exec.acquire()')
-            self.sem_exec.acquire()
+            network_knowledge.nk.sem_exec.acquire()
             print ('fatto')
-
             print "EXECUTE PARTITO"
+            
             n = network_knowledge.nk.dict_action.items()
             #if (network_knowledge.nk.dict_action.has_key(n[3])): 
             #    network_knowledge.nk.del_exe_entry(n[3])    #cancella host nel dizionario delle azioni in sospeso
@@ -84,7 +84,7 @@ class NetworkExecute(app_manager.RyuApp):
                     return
 
             print ('sem_plan2.release()')
-            network_plan.p.sem_plan2.release()
+            network_knowledge.nk.sem_plan2.release()
             print ('sem_plan2.release()')
 
     
@@ -564,4 +564,3 @@ class NetworkExecute(app_manager.RyuApp):
         datapath.send_msg(mod)
     '''
 
-e=NetworkExecute()

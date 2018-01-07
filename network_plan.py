@@ -30,7 +30,6 @@ import network_monitor
 import network_execute
 import network_knowledge
 
-
 CONF = cfg.CONF
 
 
@@ -45,47 +44,41 @@ class NetworkPlan(app_manager.RyuApp):
     def __init__(self, *args, **kwargs):
         super(NetworkPlan, self).__init__(*args, **kwargs)
         self.name = 'plan'
-        self.sem_plan = threading.Semaphore(0)
-        self.sem_plan2 = threading.Semaphore(1)
+        #self.sem_plan = threading.Semaphore(0)
+        #self.sem_plan2 = threading.Semaphore(1)
         self.plan_thread = hub.spawn(self._plan)
         print("Plan thread: ", self.plan_thread)
     
-  
-    
+
+
     def _plan(self):
         print "PLAN PARTITO"
 
         while (1):
 
             print ('sem_plan.acquire()')
-            self.sem_plan.acquire()
+            network_knowledge.nk.sem_plan.acquire()
             print ('fatto')
             
-
             #m = network_knowledge.nk.dict_speed.items()    #Returns a list of dict's (key, value) tuple pairs
             x = network_knowledge.nk.dict_avg.items()
-            
             print network_knowledge.nk.dict_speed
             st = self.somma(network_knowledge.nk.dict_speed)            
 
             print ('sem_mon.release()')
-            network_monitor.nm.sem_mon.release()
+            network_knowledge.nk.sem_mon.release()
             print ('fatto')
 
-
-
-            #self.sem_exec.acquire()
 
             if (st < setting.SRV_THRSH):    #SRV_THRSH = 2621440 = 20 Mbit
                 print ("*********" + str(st))
                 print ("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
                 hub.sleep(1)
 
-
             if (st >= setting.SRV_THRSH):
                 
                 print ('sem_plan2.acquire()')
-                self.sem_plan2.acquire()
+                network_knowledge.nk.sem_plan2.acquire()
                 print ('fatto')
 
                 print ("*********" + str(st))
@@ -165,8 +158,8 @@ class NetworkPlan(app_manager.RyuApp):
                             network_knowledge.nk.add_exe_entry(k, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts)
                             
                 print ('sem_exec.release()')
-                network_monitor.nm.sem_mon.release()
-                network_execute.e.sem_exec.release()
+                network_knowledge.nk.sem_mon.release()
+                network_knowledge.nk.sem_exec.release()
                 print ('fatto')
 
     def somma(self, a):
@@ -181,7 +174,7 @@ class NetworkPlan(app_manager.RyuApp):
     '''
     #hub.sleep(5)    
 
-p=NetworkPlan()
+
 
 
 

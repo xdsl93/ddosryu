@@ -72,7 +72,7 @@ class NetworkMonitor(app_manager.RyuApp):
         self.save_freebandwidth_thread = hub.spawn(self._save_bw_graph)
         self.message_flow = []
         self.f = {}
-        self.sem_mon = threading.Semaphore(1)
+        #self.sem_mon = threading.Semaphore(1)
        
         
     @set_ev_cls(ofp_event.EventOFPStateChange,
@@ -111,12 +111,13 @@ class NetworkMonitor(app_manager.RyuApp):
                 #self.analyze('flow')
                 hub.sleep(1)
             self.analyze('flow')
+            print("ANALIZZATORE PARTITO")
 
     def analyze(self, type):
-        print("ANALIZZATORE")
+        print("ANALIZZANDO..")
 
-        
-        self.sem_mon.acquire()
+        print("Sem Mon")
+        network_knowledge.nk.sem_mon.acquire()
 
         somma = 0
 
@@ -140,9 +141,9 @@ class NetworkMonitor(app_manager.RyuApp):
                                       flow.match.get('ipv4_dst'))):
                                         
                     d = self.flow_speed[dpid]
-                    #print d                                            #\\\\\\\\\\\\\\\\\  
+                    #print d                                            
                     for k in d.keys():
-                        #print "Velocita di ", k, " : ", d[k][0]        #\\\\\\\\\\\\\\\\\
+                        #print "Velocita di ", k, " : ", d[k][0]        
 
                         if (k in self.f.keys()):
                             fs = self.f[k]
@@ -163,17 +164,13 @@ class NetworkMonitor(app_manager.RyuApp):
                         for i in range(len(fs)):
                             somma += fs[i]
                 
-                        #print ('self.sem_plan1.acquire()')
-                        #self.sem_plan1.acquire()
-                        #print ('self.sem_plan1.acquire()')
-
                         if (stat.match['ipv4_dst'] == '10.0.0.1'):
                     
                             flow_ts = datetime.now()
 
-                            print ('self.sem_plan1.acquire()')
-                            self.sem_plan1.acquire()
-                            print ('self.sem_plan1.acquire()')
+                            print ('self.sem_plan.acquire()')
+                            network_knowledge.nk.sem_plan.acquire()
+                            print ('self.sem_plan.acquire()')
                             
                             network_knowledge.nk.add_speed(stat.match['ipv4_src'], self.datapaths[dpid], stat.match['in_port'], flow_ts, fs)
                             #network_knowledge.nk.add_host_to_dict(stat.match['ipv4_src'], fs)
@@ -206,17 +203,11 @@ class NetworkMonitor(app_manager.RyuApp):
                             print ('dizionario media ' + str(network_knowledge.nk.dict_avg))   
 
                             print ('sem_plan.release()')
-                            network_plan.p.sem_plan.release()
+                            network_knowledge.nk.sem_plan.release()
                             print ('fatto')          
                             
                         else: 
-                            pass
-
-                       
-                        #print ('self.sem_mon.release()')
-                        #self.sem_mon.release()
-                        #print ('self.sem_mon.release()')
-                        
+                            pass                    
 
                 print '\n'
 
@@ -563,7 +554,6 @@ class NetworkMonitor(app_manager.RyuApp):
                             self.port_features[dpid][stat.port_no][1]))
             print '\n'
 
-nm=NetworkMonitor()
 
 
 
