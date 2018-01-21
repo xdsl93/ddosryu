@@ -71,8 +71,7 @@ class NetworkPlan(app_manager.RyuApp):
 
 
             if (st < setting.SRV_THRSH):    #SRV_THRSH = 2621440 = 20 Mbit
-                print ("*********" + str(st))
-                print ("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
+                print ("Entrato nel st < setting.SRV_THRSH" + str(st))                
                 hub.sleep(1)
 
             if (st >= setting.SRV_THRSH):
@@ -81,18 +80,16 @@ class NetworkPlan(app_manager.RyuApp):
                 network_knowledge.nk.sem_plan2.acquire()
                 print ('fatto')
 
-                print ("*********" + str(st))
-                print ("----------+++++++++--------++++++++-----")
-                
+                print ("Entrato nel st >= setting.SRV_THRSH" + str(st))                
                 #m = network_knowledge.nk.dict_speed.items()    #Returns a list of dict's (key, value) tuple pairs
                 print('%%%' + str(x))
                 
                 
                 for k, v in x:
 
-                    if (v>2*setting.MAX_SPEED):
+                    if (v>2*setting.MAX_SPEED):     #x>10mbps
 
-                        t = network_knowledge.nk.dict_flow_ts.get(k, default=None)   #ricava il timestamp necessario per modificare la blacklist
+                        t = network_knowledge.nk.dict_flow_ts.get(k, 0)   #ricava il timestamp necessario per modificare la blacklist
                         network_knowledge.nk.edit_blacklist(k, t) #passa ip e ts, inserisci  l host nella blacklist
                         
                         '''
@@ -101,9 +98,9 @@ class NetworkPlan(app_manager.RyuApp):
                         '''
                         exe_action = 'block'
                         exe_src = k
-                        exe_dpid = network_knowledge.nk.dict_dpid.get(k, default=None)
+                        exe_dpid = network_knowledge.nk.dict_dpid.get(k, 0)
                         exe_dst = '10.0.0.1'    #serve all execute, anche se sappiamo gia il nostro obiettivo dell attacco
-                        exe_port = network_knowledge.nk.dict_in_port.get(k, default=None)
+                        exe_port = network_knowledge.nk.dict_in_port.get(k, 0)
                         exe_flow_ts = t
                         
                         network_knowledge.nk.add_exe_entry(k, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts)               
@@ -126,16 +123,16 @@ class NetworkPlan(app_manager.RyuApp):
                         
                         if (diff == False or diff <=10):                    #se non presente nella blacklist o <20sec fa niente
                             
-                            t = network_knowledge.nk.dict_flow_ts.get(k, default=None)   #ricava il timestamp necessario per modificare la blacklist                        
+                            t = network_knowledge.nk.dict_flow_ts.get(k, 0)   #ricava il timestamp necessario per modificare la blacklist                        
                             '''
                             creazione dizionario con parametri necessari al modulo network_execute
                             datapath[2], src_ip[3], dst_ip n[4], in_port n[5]
                             '''
                             exe_action = 'limit1'
                             exe_src = k
-                            exe_dpid = network_knowledge.nk.dict_dpid.get(k, default=None)
+                            exe_dpid = network_knowledge.nk.dict_dpid.get(k, 0)
                             exe_dst = '10.0.0.1'    #serve all execute, anche se sappiamo gia il nostro obiettivo dell attacco
-                            exe_port = network_knowledge.nk.dict_in_port.get(k, default=None)
+                            exe_port = network_knowledge.nk.dict_in_port.get(k, 0)
                             exe_flow_ts = t
                             
                             network_knowledge.nk.add_exe_entry(k, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts)
@@ -143,16 +140,16 @@ class NetworkPlan(app_manager.RyuApp):
 
                         elif (diff > 10):                   #se presente nella blacklist da almeno 20 secondi
                             
-                            t = network_knowledge.nk.dict_flow_ts.get(k, default=None)   #ricava il timestamp necessario per modificare la blacklist                        
+                            t = network_knowledge.nk.dict_flow_ts.get(k, 0)   #ricava il timestamp necessario per modificare la blacklist                        
                             '''
                             creazione dizionario con parametri necessari al modulo network_execute
                             datapath[2], src_ip[3], dst_ip n[4], in_port n[5]
                             '''
                             exe_action = 'limit2'
                             exe_src = k
-                            exe_dpid = network_knowledge.nk.dict_dpid.get(k, default=None)
+                            exe_dpid = network_knowledge.nk.dict_dpid.get(k, 0)
                             exe_dst = '10.0.0.1'    #serve all execute, anche se sappiamo gia il nostro obiettivo dell attacco
-                            exe_port = network_knowledge.nk.dict_in_port.get(k, default=None)
+                            exe_port = network_knowledge.nk.dict_in_port.get(k, 0)
                             exe_flow_ts = t
                             
                             network_knowledge.nk.add_exe_entry(k, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts)

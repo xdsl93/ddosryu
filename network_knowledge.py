@@ -50,8 +50,8 @@ class NetworkKnowledge(app_manager.RyuApp):
         self.dict_flow_ts = {}
         self.dict_action = {}
 
-        self.sem_mon = threading.Semaphore(100)
-        
+        self.sem_mon = threading.Semaphore(1)
+
         self.sem_plan = threading.Semaphore(0)
         self.sem_plan2 = threading.Semaphore(1)
 

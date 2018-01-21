@@ -116,8 +116,8 @@ class NetworkMonitor(app_manager.RyuApp):
     def analyze(self, type):
         print("ANALIZZANDO..")
 
-        print("Sem Mon")
-        network_knowledge.nk.sem_mon.acquire()
+        # print("Sem Mon")
+        # network_knowledge.nk.sem_mon.acquire()
 
         somma = 0
 
@@ -153,7 +153,7 @@ class NetworkMonitor(app_manager.RyuApp):
                         fs.insert(0, d[k][0])
                         if (len(fs) > 5):
                             fs.pop()
-                        
+
                         self.f[k] = fs
 
                         '''
@@ -166,16 +166,21 @@ class NetworkMonitor(app_manager.RyuApp):
                 
                         if (stat.match['ipv4_dst'] == '10.0.0.1'):
                     
+
+
                             flow_ts = datetime.now()
 
-                            print ('self.sem_plan.acquire()')
-                            network_knowledge.nk.sem_plan.acquire()
-                            print ('self.sem_plan.acquire()')
+
                             
                             network_knowledge.nk.add_speed(stat.match['ipv4_src'], self.datapaths[dpid], stat.match['in_port'], flow_ts, fs)
                             #network_knowledge.nk.add_host_to_dict(stat.match['ipv4_src'], fs)
 
-                            hub.sleep(10)
+                            print("Sem Mon")
+                            network_knowledge.nk.sem_mon.acquire()
+
+                            print ('self.sem_plan.acquire()')
+                            network_knowledge.nk.sem_plan.release()
+                            print ('self.sem_plan.acquire()')
 
                             #calcolo media ponderata velocita
                             m = network_knowledge.nk.dict_speed

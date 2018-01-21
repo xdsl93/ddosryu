@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/ubuntu/ryu/ryu/app/network_awareness/
+cd /home/ubuntu/ryu/ryu/app/ddosryu/
 ryu-manager network_main_ddos.py --observe-links --k-paths=2 --weight=bw
 
 cd
