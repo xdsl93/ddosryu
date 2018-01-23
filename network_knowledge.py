@@ -70,12 +70,11 @@ class NetworkKnowledge(app_manager.RyuApp):
         >>>a
         {'somekey': [1, 2]}
         '''
-        if not ip_src in self.blocked_sources:              #hash table dei dict piu efficente rispetto ricerca lineare di un vettore
+        if not ip_src in self.blocked_sources:      #hash table dei dict piu efficente rispetto ricerca lineare di un vettore
             self.blocked_sources.setdefault(ip_src, [])     
             self.blocked_sources[ip_src].append(ts)
         else:
             self.blocked_sources[ip_src].append(ts)
-
 
 
     '''
@@ -106,17 +105,14 @@ class NetworkKnowledge(app_manager.RyuApp):
         if not ip_src in self.dict_speed:
             self.dict_speed.setdefault(ip_src, []) 
             self.dict_speed[ip_src] = fs
-
             self.add_dpid(ip_src, dpid)
             self.add_in_port(ip_src, in_port)
             self.add_flow_ts(ip_src, flow_ts)
             print ("Aggiunto HOST   " + str(self.dict_speed))
-
         else:
             self.dict_speed[ip_src] = fs
             print ("Update HOST     " + str(self.dict_speed))            
     
-
     def add_dpid(self, ip_src, dpid):
         if not ip_src in self.dict_dpid:
             self.dict_dpid.setdefault(ip_src, None) 
@@ -149,42 +145,5 @@ class NetworkKnowledge(app_manager.RyuApp):
 
     def get_dict_speed(self):
         return self.dict_speed
-    '''
-    add_host_to_dict crea dizionario con
-    key: ip_src
-    value: [fs, self.datapaths[dpid], stat.match['ipv4_src'], stat.match['ipv4_dst'], stat.match['in_port'], flow_ts]
-    '''
-    
-    '''
-    def add_host_to_dict(self, ip_src, val):        #ip_src --> key, mega array --> value
-        if not ip_src in self.dict_connected_hosts:              
-            self.dict_connected_hosts.setdefault(ip_src, []) 
-            self.dict_connected_hosts[ip_src] = val     #replace with new message_flow
-    
-            #self.dict_connected_hosts[ip_src].append(val)
-            print ("+++++++" + str(self.dict_connected_hosts))
-        else:
-            self.dict_connected_hosts[ip_src] = val     #replace with new message_flow
-            print ("-------" + str(self.dict_connected_hosts))
-    '''
-    '''
-    def add_host_to_dict(self, ip_src, dpid, in_port, flow_ts, fs):
-        if not ip_src in self.dict_connected_hosts:
-            self.dict_connected_hosts[ip_src] = {}
-            self.dict_connected_hosts[ip_src][dpid] = {}
-            self.dict_connected_hosts[ip_src][dpid][in_port] = {}
-            self.dict_connected_hosts[ip_src][dpid][in_port][flow_ts] = []
-            self.dict_connected_hosts[ip_src][dpid][in_port][flow_ts] = fs
-            print ("+++++++" + str(self.dict_connected_hosts))
-
-        if ip_src in self.dict_connected_hosts:
-        
-            
-            self.dict_connected_hosts[ip_src][dpid][in_port][flow_ts] = fs
-            print ("-------" + str(self.dict_connected_hosts))
-
-    '''
-
-
 
 nk=NetworkKnowledge()

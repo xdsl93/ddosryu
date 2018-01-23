@@ -28,7 +28,6 @@ from ryu.topology.api import get_switch, get_link
 import setting
 import threading
 
-
 import network_monitor
 import network_topo_disc
 import network_plan
@@ -56,7 +55,6 @@ class NetworkExecute(app_manager.RyuApp):
     def _execute(self):
         print "EXECUTE PARTITO"
 
-        
         while (1):
             
             print ('sem_exec.acquire()')
@@ -76,7 +74,7 @@ class NetworkExecute(app_manager.RyuApp):
                     print v[3]
                 elif (v[0] == "limit1"):
                     #print("$$$" + str(n))       
-                    self.limit_flow1(v[2], v[1], v[3], v[4]) #passa datapath[2], src_ip[3], dst_ip v[4], in_port v[5]
+                    self.limit_flow1(v[2], v[1], v[3], v[4]) 
                     network_knowledge.nk.edit_blacklist(v[1], v[5]) #passa src_ip e flow_ts
                 elif (v[0] == "limit2"):
                     self.limit_flow2(v[2], v[1], v[3], v[4])
@@ -88,11 +86,9 @@ class NetworkExecute(app_manager.RyuApp):
             print ('sem_plan2.release()')
 
     
-
     '''
     il metodo blocca il flusso riguardante i dati passati
     '''
-    
     def drop_flow(self, dp, ip_src, ip_dst, in_port):
         datapath = dp 
         ofproto = datapath.ofproto
@@ -101,16 +97,13 @@ class NetworkExecute(app_manager.RyuApp):
         match = parser.OFPMatch(eth_type=0x0800,
                                 ipv4_src=ip_src, 
                                 ipv4_dst=ip_dst,
-                                in_port=in_port)  
-        #inst = [] 
-        #actions = [parser.OFPActionOutput(ofproto.OFPP_NORMAL, 0)]
+                                in_port=in_port)
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_CLEAR_ACTIONS, [])]
         mod = parser.OFPFlowMod(datapath=datapath,
                                 command=ofproto.OFPFC_ADD,
                                 match=match, instructions=inst)  #instruction=[] droppa il flusso 
         print "deleting flow entries in the table "
         datapath.send_msg(mod)
-
 
 
     #handler messaggio errore se flusso non riesce ad essere modificato
@@ -124,7 +117,6 @@ class NetworkExecute(app_manager.RyuApp):
                         msg.type, msg.code, utils.hex_array(msg.data))
 
 
-
     '''
     il metodo limita la velocita del flusso
     a 100kbps per 10 secondi, po riprende alla velocita originaria
@@ -135,11 +127,9 @@ class NetworkExecute(app_manager.RyuApp):
     # la prima parte imposta il meter_id=1, volendo si possono impostarne anche altri
 
     def limit_flow1(self, dp, ip_src, ip_dst, in_port):
-        datapath = dp ##
+        datapath = dp
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-
-        #self.ipv4_src = ip_src
         
         #primo meter
         bands = [parser.OFPMeterBandDrop(type_=ofproto.OFPMBT_DROP, len_=0, rate=100, burst_size=10)]
@@ -179,7 +169,6 @@ class NetworkExecute(app_manager.RyuApp):
     Se host attaccante non riduce il suo output, quando il primo meter termina
     viene eseguito questo secondo meter piu restrittivo
     '''
-
     def limit_flow2(self, dp, ip_src, ip_dst, in_port):
         datapath = dp
         ofproto = datapath.ofproto
@@ -189,7 +178,7 @@ class NetworkExecute(app_manager.RyuApp):
         bands = [parser.OFPMeterBandDrop(type_=ofproto.OFPMBT_DROP, len_=0, rate=50, burst_size=10)]
 
         req=parser.OFPMeterMod(datapath=datapath,
-                            command=ofproto.OFPMC_ADD,  # o MODIFY?...non cambia nulla
+                            command=ofproto.OFPMC_ADD,
                             flags=ofproto.OFPMF_KBPS,
                             meter_id=4,
                             bands=bands)
@@ -226,341 +215,3 @@ class NetworkExecute(app_manager.RyuApp):
                             'bands=%s' %
                             (stat.length, stat.flags, stat.meter_id, stat.bands))
         self.logger.debug('MeterConfigStats: %s', configs)
-    
-
-
-
-
-
-
-
-
-
-    '''        
-    def _execute(self):
-        while (1):
-            
-            self.exec_sem.release()
-            n = coda_azione.aq.pop()
-            #print n
-            if (n[0] == "block"):
-                #print str(n)
-                self.drop_flow(n[2], n[3], n[4], n[5]) #passa datapath[2], src_ip[3], dst_ip n[4], in_port n[5]
-                print n[3]
-            elif (n[0] == "limit1"):
-                #print("$$$" + str(n))       
-                    self.limit_flow1(n[2], n[3], n[4], n[5]) #passa datapath[2], src_ip[3], dst_ip n[4], in_port n[5]
-                    network_knowledge.nk.edit_blacklist(n[3], n[6]) #passa src_ip e flow_ts
-            elif (n[0] == "limit2"):
-                    self.limit_flow2(n[2], n[3], n[4], n[5])
-            else:
-                return
-            self.exec_sem.acquire()
-    '''
-
-
-    '''
-    def limit_flow(self, dp, ip_src, ip_dst, in_port):
-        datapath = dp ##
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        # install table-miss flow entry
-        match = parser.OFPMatch(eth_type=0x0800,
-                                ipv4_src=ip_src, 
-                                ipv4_dst=ip_dst,
-                                in_port=in_port)
-
-        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
-        rate=100
-        burst_size=0
-        bands=[]
-        bands.append(parser.OFPMeterBandDrop(rate, burst_size))
-        meter_mod = parser.OFPMeterMod(datapath=datapath,  ##
-                                       command=ofproto.OFPMC_ADD,
-                                       flags=ofproto.OFPMF_KBPS,                                       
-                                       meter_id=1, 
-                                       bands=bands)
-        datapath.send_msg(meter_mod)
-
-        # Add the meter to the table miss
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions), 
-                                             parser.OFPInstructionMeter(1)]
-        mod = parser.OFPFlowMod(datapath=datapath, 
-                                priority=0,
-                                match=match, 
-                                instructions=inst)
-        print "limit flow entries in the table "
-        datapath.send_msg(mod)
-    '''
-    
-
-
-
-    '''
-    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
-    def _packet_in_handler(self, ev):
-        msg = ev.msg
-        datapath = msg.datapath
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-        in_port = msg.match['in_port']
-
-        pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocols(ethernet.ethernet)[0]
-
-        dst = eth.dst
-        src = eth.src
-
-        dpid = datapath.id
-        self.mac_to_port.setdefault(dpid, {})
-
-        self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
-        
-        # learn a mac address to avoid FLOOD next time.
-        self.mac_to_port[dpid][src] = in_port
-
-        if dst in self.mac_to_port[dpid]:
-            out_port = self.mac_to_port[dpid][dst]
-        else:
-            out_port = ofproto.OFPP_FLOOD
-
-        actions = [parser.OFPActionOutput(out_port)]
-
-        # install a flow to avoid packet_in next time
-        if out_port != ofproto.OFPP_FLOOD:
-            match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
-            self.add_flow(datapath, 1, match, actions)
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-        print('FLUSSO BLOCCATO')
-    
-
-    def add_flow(self, dp, p, match, actions, idle_timeout=0, hard_timeout=0):
-        ofproto = dp.ofproto
-        parser = dp.ofproto_parser
-
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
-                                             actions)]
-
-        mod = parser.OFPFlowMod(datapath=dp, priority=p,
-                                idle_timeout=idle_timeout,
-                                hard_timeout=hard_timeout,
-                                match=match, instructions=inst)
-        dp.send_msg(mod)
-    '''
-
-
-
-
-    '''
-    def del_flow(self, datapath):
-        ofp = datapath.ofproto
-        ofp_parser = datapath.ofproto_parser
-
-        cookie = cookie_mask = 0
-        table_id = 0
-        idle_timeout = hard_timeout = 0
-        priority = 32768
-        buffer_id = ofp.OFP_NO_BUFFER
-        match = ofp_parser.OFPMatch(in_port=1, eth_dst='ff:ff:ff:ff:ff:ff')
-        actions = [ofp_parser.OFPActionOutput(ofp.OFPP_NORMAL, 0)]
-        inst = [ofp_parser.OFPInstructionActions(ofp.OFPIT_APPLY_ACTIONS,
-                                                actions)]
-        req = ofp_parser.OFPFlowMod(datapath, cookie, cookie_mask,
-                                    table_id, ofp.OFPFC_DELETE,
-                                    idle_timeout, hard_timeout,
-                                    priority, buffer_id,
-                                    ofp.OFPP_ANY, ofp.OFPG_ANY,
-                                    ofp.OFPFF_SEND_FLOW_REM,
-                                    match, inst)
-        datapath.send_msg(req)
-    '''
-
-    '''
-    def del_flow(self, datapath):
-        self.logger.debug('send stats request: %016x', datapath.id)
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        req = parser.OFPFlowStatsRequest(datapath)
-        datapath.send_msg(req)
-
-        req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
-        datapath.send_msg(req)
-
-    @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
-    def _flow_stats_reply_handler(self, ev):
-        body = ev.msg.body
-        for stat in sorted([flow for flow in body if flow.priority >= 1],
-                                key=lambda flow: (flow.instructions[0].actions[0])):
-		#add a flow to drop the packet
-		dp = ev.msg.datapath
-		ofp = dp.ofproto
-		parser = dp.ofproto_parser
-
-		match = parser.OFPMatch(in_port=stat.match['in_port'])
-		actions = [parser.OFPActionSetQueue(1)]
-		inst = [parser.OFPInstructionActions(ofp.OFPIT_APPLY_ACTIONS,actions),parser.OFPInstructionGotoTable(1)]
-		mod = parser.OFPFlowMod(datapath=dp, priority=1,match=match, instructions=inst)
-		dp.send_msg(mod)
-    '''
-  
-
-
-
-
-
-    '''
-    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
-    def _packet_in_handler(self, ev):
-        msg = ev.msg
-        datapath = msg.datapath
-        ofproto = datapath.ofproto
-
-        pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocol(ethernet.ethernet)
-
-
-        dst = eth.dst
-        src = eth.src
-
-        dpid = datapath.id
-        self.mac_to_port.setdefault(dpid, {})
-
-        self.logger.info("packet in %s %s %s %s", dpid, src, dst, msg.in_port)
-
-        # learn a mac address to avoid FLOOD next time.
-        self.mac_to_port[dpid][src] = msg.in_port
-
-        if dst in self.mac_to_port[dpid]:
-            out_port = self.mac_to_port[dpid][dst]
-        else:
-            out_port = ofproto.OFPP_FLOOD
-
-        actions = [datapath.ofproto_parser.OFPActionOutput(out_port)]
-
-        # install a flow to avoid packet_in next time
-        if out_port != ofproto.OFPP_FLOOD:
-            self.add_flow(datapath, msg.in_port, dst, actions)
-
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-
-        out = datapath.ofproto_parser.OFPPacketOut(
-            datapath=datapath, buffer_id=msg.buffer_id, in_port=msg.in_port,
-            actions=actions, data=data)
-        datapath.send_msg(out)
-    '''
-
-
-
-
-
-
-
-    '''
-    #cancellazione diretta del flusso
-   
-    def delete_flow(self, datapath):
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-        for dst in self.mac_to_port[datapath.id].keys():
-            match = parser.OFPMatch(eth_dst=dst)
-            mod = parser.OFPFlowMod(
-                datapath, command=ofproto.OFPFC_DELETE,
-                out_port=ofproto.OFPP_ANY, out_group=ofproto.OFPG_ANY,
-                priority=1, match=match)
-        datapath.send_msg(mod)
-    '''
-
-    '''
-    #blocco del flusso senza bloccare host 
-    
-    def create_blocking_flow(self, ip_src):
-        # This should be reset when the flow has timed out
-        if not ip_src in self.blocked_sources:
-            self.blocked_sources.append(ip_src)
-            match = datapath.ofproto_parser.OFPMatch(dl_type=0x0800, nw_src=ipv4_text_to_int(ip_src), nw_src_mask=32)
-            mod = datapath.ofproto_parser.OFPFlowMod(
-                datapath=datapath, match=match, cookie=random_int(),
-                command=datapath.ofproto.OFPFC_ADD, idle_timeout=10, hard_timeout=0,
-                priority=0x8000, flags=datapath.ofproto.OFPFF_SEND_FLOW_REM)
-            datapath.send_msg(mod)
-            print 'creating blocking flow for source: {0}'.format(ip_src)
-    '''
-
-
-    '''
-    def blocca(self, datapath):
-        ofp = datapath.ofproto
-        ofp_parser = datapath.ofproto_parser
-
-        cookie = cookie_mask = 0
-        table_id = 0
-        idle_timeout = hard_timeout = 0
-        priority = 32768
-        buffer_id = ofp.OFP_NO_BUFFER
-        importance = 0
-        match = ofp_parser.OFPMatch(in_port=1, eth_dst='ff:ff:ff:ff:ff:ff')
-        actions = [ofp_parser.OFPActionOutput(ofp.OFPP_NORMAL, 0)]
-        inst = [ofp_parser.OFPInstructionActions(ofp.OFPIT_APPLY_ACTIONS,
-                                                actions)]
-        req = ofp_parser.OFPFlowMod(datapath, cookie, cookie_mask,
-                                    table_id, ofp.OFPFC_ADD,
-                                    idle_timeout, hard_timeout,
-                                    priority, buffer_id,
-                                    ofp.OFPP_ANY, ofp.OFPG_ANY,
-                                    ofp.OFPFF_SEND_FLOW_REM,
-                                    importance,
-                                    match, inst)
-        datapath.send_msg(req)
-    '''
-
-
-    '''
-    il metodo limita la velocita del flusso
-    a 100kbps
-    '''
-    '''
-    # la prima parte imposta il meter_id=1, volendo si possono impostarne anche altri
-
-    def limit_flow(self, dp, ip_src, ip_dst, in_port):
-        datapath = dp ##
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        bands = [parser.OFPMeterBandDrop(type_=ofproto.OFPMBT_DROP, len_=0, rate=100, burst_size=10)]
-
-        req=parser.OFPMeterMod(datapath=datapath,
-                               command=ofproto.OFPMC_ADD,
-                               flags=ofproto.OFPMF_KBPS,
-                               meter_id=3,
-                               bands=bands)
-
-        datapath.send_msg(req)
-
-        #applica meter_id=1 al flusso interessato
-        match = parser.OFPMatch(eth_type=0x0800,
-                                ipv4_src=ip_src, 
-                                ipv4_dst=ip_dst,
-                                in_port=in_port)
-
-        actions = [parser.OFPActionOutput(port=ofproto.OFPP_CONTROLLER)]
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions), 
-                parser.OFPInstructionMeter(3,ofproto.OFPIT_METER)]
-
-        mod = parser.OFPFlowMod(datapath=datapath, 
-                                match=match, cookie=0,
-                                command=ofproto.OFPFC_ADD, 
-                                idle_timeout=0,
-                                hard_timeout=10,
-                                priority=3,
-                                instructions=inst)
-        
-        print "limit flow entries in the table "
-        datapath.send_msg(mod)
-    '''
-
