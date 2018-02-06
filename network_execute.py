@@ -50,28 +50,26 @@ class NetworkExecute(app_manager.RyuApp):
 
         #self.sem_exec = threading.Semaphore(0)
         self.execute_thread = hub.spawn(self._execute)
-        print("Execute thread: ", self.execute_thread)
 
     def _execute(self):
         print "EXECUTE PARTITO"
 
         while (1):
             
-            print ('sem_exec.acquire()')
+            #print ('sem_exec.acquire()')
             network_knowledge.nk.sem_exec.acquire()
-            print ('fatto')
-            print "EXECUTE PARTITO"
+            #print ('sem_exec.acquire() fatto')
+            #print "EXECUTE PARTITO"
             
             n = network_knowledge.nk.dict_action.items()
             #if (network_knowledge.nk.dict_action.has_key(n[3])): 
             #    network_knowledge.nk.del_exe_entry(n[3])    #cancella host nel dizionario delle azioni in sospeso
             #dict.get(key, default=None)
-            print n
+            print ("DictAction nell execute" + str(n))
             for k, v in n:
                 if (v[0] == "block"):
                     #print str(n)
                     self.drop_flow(v[2], v[1], v[3], v[4]) #passa datapath[2], src_ip[1], dst_ip v[3], in_port v[4]
-                    print v[3]
                 elif (v[0] == "limit1"):
                     #print("$$$" + str(n))       
                     self.limit_flow1(v[2], v[1], v[3], v[4]) 
@@ -81,9 +79,9 @@ class NetworkExecute(app_manager.RyuApp):
                 else:
                     return
 
-            print ('sem_plan2.release()')
+            #print ('sem_plan2.release()')
             network_knowledge.nk.sem_plan2.release()
-            print ('sem_plan2.release()')
+            #print ('sem_plan2.release()')
 
     
     '''

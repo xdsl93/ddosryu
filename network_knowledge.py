@@ -1,31 +1,8 @@
-import logging
-from logging import LoggerAdapter
-
-import struct
-import copy
-import networkx as nx
-from operator import attrgetter
 from ryu import cfg
 from ryu.base import app_manager
-from ryu.controller import ofp_event
-from ryu.controller.handler import MAIN_DISPATCHER, DEAD_DISPATCHER
-from ryu.controller.handler import CONFIG_DISPATCHER, HANDSHAKE_DISPATCHER
-from ryu.controller.handler import set_ev_cls
-from ryu.ofproto import ofproto_v1_3_parser
-from ryu.ofproto import ofproto_v1_3
-from ryu.lib.dpid import str_to_dpid
-from ryu.lib.packet import packet
-from ryu.lib.packet import ethernet
-from ryu.lib.packet import ipv4
-from ryu.lib.packet import arp
-from ryu.lib import hub
-from ryu.lib import lacplib
-from ryu import utils
-from threading import Timer
-import dpkt
 
-from ryu.topology import event, switches
-from ryu.topology.api import get_switch, get_link
+from ryu.ofproto import ofproto_v1_3
+
 import setting
 import threading
 
@@ -131,6 +108,7 @@ class NetworkKnowledge(app_manager.RyuApp):
             self.dict_flow_ts[ip_src] = flow_ts
             print ("Aggiunta FLOW_TS" + str(self.dict_flow_ts))
 
+
     def add_exe_entry(self, ip_src, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts):
         if not ip_src in self.dict_action:
             v = [exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts]
@@ -141,7 +119,7 @@ class NetworkKnowledge(app_manager.RyuApp):
             pass
     
     def del_exe_entry(self, ip_src):
-        del dict_action[ip_src]
+        del self.dict_action[ip_src]
 
     def get_dict_speed(self):
         return self.dict_speed

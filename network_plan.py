@@ -45,41 +45,37 @@ class NetworkPlan(app_manager.RyuApp):
         self.name = 'plan'
         #self.sem_plan = threading.Semaphore(0)
         #self.sem_plan2 = threading.Semaphore(1)
-        self.plan_thread = hub.spawn(self._plan)
-        print("Plan thread: ", self.plan_thread)
-    
+        self.plan_thread = hub.spawn(self._plan)    
 
     def _plan(self):
         print "PLAN PARTITO"
 
         while (1):
 
-            print ('sem_plan.acquire()')
+            #print ('sem_plan.acquire()')
             network_knowledge.nk.sem_plan.acquire()
-            print ('fatto')
+            #print ('sem_plan.acquire() fatto')
             
-            #m = network_knowledge.nk.dict_speed.items()
             x = network_knowledge.nk.dict_avg.items()   #Returns a list of dict's (key, value) tuple pairs 
-            print network_knowledge.nk.dict_speed
+            print ("dictSpeed" + network_knowledge.nk.dict_speed)
             st = self.somma(network_knowledge.nk.dict_speed)            
 
-            print ('sem_mon.release()')
+            #print ('sem_mon.release()')
             network_knowledge.nk.sem_mon.release()
-            print ('fatto')
+            #print ('sem_mon.release() fatto')
 
 
             if (st < setting.SRV_THRSH):    #SRV_THRSH = 2621440 = 20 Mbit
-                print ("Entrato nel st < setting.SRV_THRSH" + str(st))                
+                print ("Entrato nel st < setting.SRV_THRSH " + str(st))                
                 hub.sleep(1)
 
             if (st >= setting.SRV_THRSH):
                 
-                print ('sem_plan2.acquire()')
+                #print ('sem_plan2.acquire()')
                 network_knowledge.nk.sem_plan2.acquire()
-                print ('fatto')
+                #print ('sem_plan2.acquire() fatto')
 
-                print ("Entrato nel st >= setting.SRV_THRSH" + str(st))                
-                #m = network_knowledge.nk.dict_speed.items()
+                print ("Entrato nel st >= setting.SRV_THRSH " + str(st))                
                 print('%%%' + str(x))
                 
                 for k, v in x:
@@ -112,10 +108,10 @@ class NetworkPlan(app_manager.RyuApp):
                             now_ts = datetime.now()                        
                             diff = (now_ts-r).total_seconds()   #differenza tra now_ts e flow_ts
 
-                            print('<><><><><> differenza    ' + str(diff))
-                            print('<><><><> now_ts    ' + str(now_ts)) 
-                            print('<><><> flow_ts    ' + str(r))
-                            print('<><><>' + str(network_knowledge.nk.blocked_sources))
+                            #print('<><><><><> differenza    ' + str(diff))
+                            #print('<><><><> now_ts    ' + str(now_ts)) 
+                            #print('<><><> flow_ts    ' + str(r))
+                            print('<><><>' + 'blocked_sources' + str(network_knowledge.nk.blocked_sources))
                         
                         if (diff == False or diff <=10):    #se non presente nella blacklist o <20sec fa niente
                             
@@ -150,15 +146,15 @@ class NetworkPlan(app_manager.RyuApp):
                             
                             network_knowledge.nk.add_exe_entry(k, exe_action, exe_src, exe_dpid, exe_dst, exe_port, exe_flow_ts)
                             
-                print ('sem_exec.release()')
+                #print ('sem_exec.release()')
                 network_knowledge.nk.sem_mon.release()
                 network_knowledge.nk.sem_exec.release()
-                print ('fatto')
+                #print ('fatto')
 
     def somma(self, a):
         sum_thrsh = 0
         sum_thrsh = sum( [val[0] for val in a.values()] )
-        print a
+        #print a
         return sum_thrsh 
     '''
     def findMaxValue (self, b): #riceve lista con tuple [(ip, 5val),(ip2, 5val)...]

@@ -69,7 +69,6 @@ class NetworkMonitor(app_manager.RyuApp):
         # free bandwidth of links respectively.
         self.monitor_thread = hub.spawn(self._monitor)
         self.save_freebandwidth_thread = hub.spawn(self._save_bw_graph)
-        self.message_flow = []
         self.f = {}
         #self.sem_mon = threading.Semaphore(1)
 
@@ -107,7 +106,6 @@ class NetworkMonitor(app_manager.RyuApp):
             if self.stats['flow'] or self.stats['port']:
                 self.show_stat('flow')
                 self.show_stat('port')
-                #self.analyze('flow')
                 hub.sleep(1)
             self.analyze('flow')
             print("ANALIZZATORE PARTITO")
@@ -136,7 +134,7 @@ class NetworkMonitor(app_manager.RyuApp):
                 
                 for stat in sorted(
                     [flow for flow in bodys[dpid] if flow.priority == 1],
-                    key=lambda flow: (flow.match.get('in_port'), #flow.match.get('ipv4_src'),
+                    key=lambda flow: (flow.match.get('in_port'),
                                       flow.match.get('ipv4_dst'))):
                                         
                     d = self.flow_speed[dpid]
@@ -162,7 +160,7 @@ class NetworkMonitor(app_manager.RyuApp):
 
                         for i in range(len(fs)):
                             somma += fs[i]
-                
+
                         if (stat.match['ipv4_dst'] == '10.0.0.1'):
                     
 
@@ -170,45 +168,27 @@ class NetworkMonitor(app_manager.RyuApp):
                             flow_ts = datetime.now()
 
 
-                            
+  
                             network_knowledge.nk.add_speed(stat.match['ipv4_src'], self.datapaths[dpid], stat.match['in_port'], flow_ts, fs)
                             #network_knowledge.nk.add_host_to_dict(stat.match['ipv4_src'], fs)
 
-                            print("Sem Mon")
+                            #print("Sem Mon")
                             network_knowledge.nk.sem_mon.acquire()
+                            #print("Sem Mon fatto")
 
-                            print ('self.sem_plan.acquire()')
+                            #print ('self.sem_plan.acquire()')
                             network_knowledge.nk.sem_plan.release()
-                            print ('self.sem_plan.acquire()')
+                            #print ('self.sem_plan.acquire() fatto')
 
                             #calcolo media ponderata velocita
                             m = network_knowledge.nk.dict_speed
-                            #myDict = {'A':['asdasd', 2, 3], 'B':['asdasd', 4, 5], 'C':['rgerg', 9, 10]}
-                            #normConst = 0.7
-                            #avg = sum(sum([m[x][-1]*normConst) / float(normConst) for x in network_knowledge.nk.dict_speed.items()])
-                            #avg = np.average([val[-1] for val in m], axis=1, weights=normConst)
-                            #avg = [sum(val[-1] for val in m)/5]
-                            #avg = abs(sum(m[0][:5])/5)[val[1] for val in m ]
-                            #avg = [sum(m[1] for k in m)/5]
-                            #results = sum([x[:5] for x in m])/5
-                            #avg =  sum(x[1][:5] for x in m) / 5
-                            #print avg
-                            '''
-                            for k, v in m.items():
-                                if (len(v) < 5):
-                                    print ("Niente")
-                                else: 
-                                    avg = abs(sum(v)/5)
-                                    network_knowledge.nk.dict_avg[k] = avg
-                                    print (">>>>>>>" + str(network_knowledge.nk.dict_avg)) 
-                            '''
                             network_knowledge.nk.dict_avg = dict([(key, sum(values)/5) for key, values in m.items()])
-                            print m
+
                             print ('dizionario media ' + str(network_knowledge.nk.dict_avg))   
 
-                            print ('sem_plan.release()')
+                            #print ('sem_plan.release()')
                             network_knowledge.nk.sem_plan.release()
-                            print ('fatto')          
+                            #print ('fatto')          
                             
                         else: 
                             pass                    
@@ -522,7 +502,6 @@ class NetworkMonitor(app_manager.RyuApp):
                     key=lambda flow: (flow.match.get('ipv4_src'), #??
                                       flow.match.get('in_port'),
                                       flow.match.get('ipv4_dst'))):
-
                     print('%016x %8x %17s %17s %8x %8d %8d %8.1f' % (
                         dpid,
                         stat.match['in_port'], stat.match['ipv4_src'], #??
